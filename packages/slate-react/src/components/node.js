@@ -155,7 +155,7 @@ class Node extends React.Component {
       placeholder = React.cloneElement(placeholder, {
         key: `${node.key}-placeholder`,
       })
-      children = [placeholder, ...children]
+      children = [...children, placeholder]
     }
 
     const element = stack.find('renderNode', {
