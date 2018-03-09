@@ -82,7 +82,7 @@
     "slate": "*",
     "slate-html-serializer": "*",
     "slate-plain-serializer": "*",
-    "slate-react": "*",
+    "@makeflow/slate-react": "*",
     "slate-schema-violations": "*"
   },
   "scripts": {

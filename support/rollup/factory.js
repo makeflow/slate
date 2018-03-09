@@ -17,11 +17,11 @@ import { startCase } from 'lodash'
  * @return {Object}
  */
 
-function configure(pkg, env, target) {
+function configure(name, pkg, env, target) {
   const isProd = env === 'production'
   const isUmd = target === 'umd'
   const isModule = target === 'module'
-  const input = `packages/${pkg.name}/src/index.js`
+  const input = `packages/${name}/src/index.js`
   const deps = []
     .concat(pkg.dependencies ? Object.keys(pkg.dependencies) : [])
     .concat(pkg.peerDependencies ? Object.keys(pkg.peerDependencies) : [])
@@ -37,7 +37,7 @@ function configure(pkg, env, target) {
     // modules by default.
     isUmd &&
       commonjs({
-        exclude: [`packages/${pkg.name}/src/**`],
+        exclude: [`packages/${name}/src/**`],
         // HACK: Sometimes the CommonJS plugin can't identify named exports, so
         // we have to manually specify named exports here for them to work.
         // https://github.com/rollup/rollup-plugin-commonjs#custom-named-exports
@@ -71,7 +71,7 @@ function configure(pkg, env, target) {
 
     // Use Babel to transpile the result, limiting it to the source code.
     babel({
-      include: [`packages/${pkg.name}/src/**`],
+      include: [`packages/${name}/src/**`],
     }),
 
     // Register Node.js globals for browserify compatibility.
@@ -88,7 +88,7 @@ function configure(pkg, env, target) {
       input,
       output: {
         format: 'umd',
-        file: `packages/${pkg.name}/${isProd ? pkg.umdMin : pkg.umd}`,
+        file: `packages/${name}/${isProd ? pkg.umdMin : pkg.umd}`,
         exports: 'named',
         name: startCase(pkg.name).replace(/ /g, ''),
         globals: pkg.umdGlobals,
@@ -103,12 +103,12 @@ function configure(pkg, env, target) {
       input,
       output: [
         {
-          file: `packages/${pkg.name}/${pkg.module}`,
+          file: `packages/${name}/${pkg.module}`,
           format: 'es',
           sourcemap: true,
         },
         {
-          file: `packages/${pkg.name}/${pkg.main}`,
+          file: `packages/${name}/${pkg.main}`,
           format: 'cjs',
           exports: 'named',
           sourcemap: true,
@@ -130,12 +130,13 @@ function configure(pkg, env, target) {
  * @return {Array}
  */
 
-function factory(pkg) {
+function factory(name) {
   const isProd = process.env.NODE_ENV === 'production'
+  const pkg = require(`../../packages/${name}/package.json`)
   return [
-    configure(pkg, 'development', 'module'),
-    isProd && configure(pkg, 'development', 'umd'),
-    isProd && configure(pkg, 'production', 'umd'),
+    configure(name, pkg, 'development', 'module'),
+    isProd && configure(name, pkg, 'development', 'umd'),
+    isProd && configure(name, pkg, 'production', 'umd'),
   ].filter(Boolean)
 }
 
